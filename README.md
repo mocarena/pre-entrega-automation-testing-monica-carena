@@ -2,17 +2,9 @@
 
 ## Propósito
 
-Proyecto de automatización web desarrollado con Python, Pytest y Selenium WebDriver sobre SauceDemo.
+Proyecto de automatización web desarrollado con Python, Pytest y Selenium WebDriver sobre [SauceDemo](https://www.saucedemo.com/).
 
-El objetivo es validar un flujo básico de QA automatizado:
-
-1. Login con credenciales válidas.
-2. Redirección al inventario.
-3. Verificación del catálogo.
-4. Identificación del primer producto.
-5. Agregado del producto al carrito.
-6. Validación del badge del carrito.
-7. Verificación del producto dentro del carrito.
+El objetivo es validar funcionalidades principales de una aplicación web mediante pruebas automatizadas, aplicando buenas prácticas de QA, reutilización de código, parametrización y pruebas basadas en datos externos.
 
 ## Tecnologías
 
@@ -20,144 +12,199 @@ El objetivo es validar un flujo básico de QA automatizado:
 - Selenium WebDriver 4
 - Pytest
 - pytest-html
-- Git / GitHub
 - Google Chrome
+- Git / GitHub
+- CSV y JSON para datos de prueba
 
-## Estructura
+## Estructura del proyecto
 
 ```text
 pre-entrega-automation-testing-monica-carena/
 ├── tests/
 │   ├── conftest.py
-│   └── test_saucedemo.py
+│   ├── test_saucedemo.py
+│   ├── test_login_csv.py
+│   └── test_carrito_json.py
 ├── utils/
+│   ├── __init__.py
 │   ├── driver_factory.py
-│   └── saucedemo_helpers.py
+│   ├── saucedemo_helpers.py
+│   └── datos.py
 ├── datos/
+│   ├── login.csv
+│   └── productos.json
 ├── reports/
 ├── requirements.txt
 ├── pytest.ini
+├── .gitignore
 └── README.md
 ```
 
+*Nota: la estructura debe coincidir con los archivos reales del repositorio.*
+
 ## Instalación
 
-Crear y activar un entorno virtual:
+### 1. Clonar el repositorio
+
+```bash
+git clone URL_DEL_REPOSITORIO
+cd pre-entrega-automation-testing-monica-carena
+```
+
+Reemplazar `URL_DEL_REPOSITORIO` por la URL real del repositorio de GitHub.
+
+### 2. Crear y activar un entorno virtual
 
 ```bash
 python -m venv .venv
 ```
 
-Windows:
+En Windows:
 
-```bash
+```powershell
 .venv\Scripts\activate
 ```
 
-Instalar dependencias:
+### 3. Instalar las dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Ejecución
+Es necesario tener Google Chrome instalado y contar con una configuración compatible de Selenium WebDriver.
 
-Ejecutar todos los tests:
+## Ejecución de las pruebas
 
-```bash
-pytest -v
-```
-
-Generar reporte HTML:
+Ejecutar toda la suite:
 
 ```bash
-pytest -v --html=reports/reporte.html --self-contained-html
+python -m pytest -v
 ```
 
-Ejecutar específicamente:
+Ejecutar los tests de login con datos CSV:
 
 ```bash
-pytest tests/test_saucedemo.py -v
+python -m pytest tests/test_login_csv.py -v
 ```
 
-## Casos de prueba
+Ejecutar los tests del carrito con datos JSON:
 
-### Login
+```bash
+python -m pytest tests/test_carrito_json.py -v
+```
 
-Valida:
+Ejecutar los tests generales de SauceDemo:
 
-- Usuario `standard_user`
-- Contraseña `secret_sauce`
-- URL `/inventory.html`
-- Título `Swag Labs`
-- Texto `Products`
+```bash
+python -m pytest tests/test_saucedemo.py -v
+```
 
-### Catálogo
+Ejecutar las pruebas marcadas como smoke:
 
-Valida:
+```bash
+python -m pytest -m smoke -v
+```
+
+## Generación del reporte HTML
+
+Para generar un reporte autocontenido con los resultados de la ejecución:
+
+```bash
+python -m pytest -v --html=reports/reporte.html --self-contained-html
+```
+
+Luego, abrir `reports/reporte.html` en el navegador para consultar los resultados.
+
+## Casos de prueba implementados
+
+### 1. Login y navegación
+
+Se validan:
+
+- Inicio de sesión con credenciales válidas.
+- Redirección al inventario.
+- Título de la página.
+- Visualización del catálogo.
+- Comportamiento ante credenciales inválidas y usuarios con restricciones.
+
+### 2. Pruebas de login basadas en CSV
+
+Los escenarios de autenticación se cargan desde `datos/login.csv`.
+
+Se utiliza parametrización de Pytest para ejecutar múltiples casos con diferentes usuarios, contraseñas, resultados esperados y descripciones.
+
+Esto facilita agregar nuevos escenarios sin duplicar la estructura del test.
+
+### 3. Catálogo de productos
+
+Se validan:
 
 - Existencia de productos.
-- Nombre del primer producto.
-- Precio del primer producto.
+- Nombre y precio del primer producto.
 - Presencia del menú.
 - Presencia del selector de ordenamiento.
 
-### Carrito
+### 4. Carrito con datos desde JSON
 
-Valida:
+Los productos se cargan desde `datos/productos.json`.
 
-- Agregado del primer producto.
-- Badge del carrito igual a `1`.
-- Navegación a `/cart.html`.
-- Producto correcto dentro del carrito.
+Se valida:
 
-## Estrategias de localización
+- Selección del botón correspondiente a cada producto.
+- Incorporación del producto al carrito.
+- Actualización del badge.
+- Navegación a la página del carrito.
+- Correspondencia entre el producto seleccionado y el producto agregado.
 
-El proyecto utiliza las estrategias solicitadas durante las clases:
+Los casos se parametrizan para reutilizar el mismo test con distintos productos.
+
+### 5. Pruebas smoke
+
+Se incluyen pruebas básicas para verificar rápidamente funcionalidades esenciales, como el login y el agregado de productos al carrito.
+
+## Estrategias de localización y sincronización
+
+El proyecto utiliza distintos localizadores de Selenium:
 
 - `By.ID`
 - `By.NAME`
 - `By.CSS_SELECTOR`
+- `By.XPATH`
 
-Ejemplos:
+Se emplean esperas explícitas con `WebDriverWait` y condiciones esperadas para sincronizar las acciones con el estado de la interfaz, evitando depender exclusivamente de esperas fijas.
 
-```python
-By.ID, "user-name"
-By.NAME, "password"
-By.CSS_SELECTOR, "#login-button"
-```
+## Reutilización y aislamiento
 
-Para el badge se utiliza una espera explícita:
+Las funciones auxiliares centralizan acciones comunes, como el inicio de sesión.
 
-```python
-WebDriverWait(driver, 10)
-```
+Los fixtures de Pytest administran la preparación y limpieza del navegador, favoreciendo la independencia entre los tests.
 
-Esto evita depender de esperas fijas y hace la automatización más robusta.
-
-## Independencia de los tests
-
-Cada test crea su propio WebDriver, realiza su propio login y cierra el navegador al finalizar. Por lo tanto, una falla no debería afectar el estado de los demás tests.
+Los datos de prueba se mantienen separados del código para facilitar su mantenimiento y ampliación.
 
 ## Evidencias
 
-En caso de fallo, `conftest.py` genera automáticamente una captura PNG dentro de `reports/`.
+El proyecto permite generar:
 
-El reporte HTML también permite revisar el resultado de la ejecución.
+- Reportes HTML de ejecución.
+- Capturas PNG ante fallos, según la configuración de `conftest.py`.
+- Resultados individuales y parametrizados en la terminal.
 
-## GitHub
+## Objetivos de aprendizaje
 
-Repositorio sugerido:
+Este proyecto integra prácticas de automatización orientadas a:
 
-`pre-entrega-automation-testing-monica-carena`
+- Diseño y ejecución de pruebas funcionales.
+- Uso de Selenium WebDriver.
+- Parametrización con Pytest.
+- Gestión externa de datos con CSV y JSON.
+- Sincronización mediante esperas explícitas.
+- Reutilización de funciones y fixtures.
+- Generación de reportes y evidencias.
+- Control de versiones con Git y GitHub.
 
-Ejemplo de commits:
+## Repositorio
 
-```text
-feat: add SauceDemo login automation
-test: validate inventory catalog
-test: add shopping cart validation
-feat: add failure screenshots
-docs: add project README
-chore: configure pytest html report
-```
+**Proyecto:** Pre-Entrega Automation Testing - Monica Carena
+
+Repositorio: https://github.com/mocarena/pre-entrega-automation-testing-monica-carena/tree/main
+

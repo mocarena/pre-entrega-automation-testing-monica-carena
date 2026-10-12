@@ -1,8 +1,7 @@
 from selenium.webdriver.common.by import By
+from utils.saucedemo_helpers import login
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-from utils.saucedemo_helpers import login
 
 def test_login_success(driver):
     """Validate successful login and inventory redirection."""
